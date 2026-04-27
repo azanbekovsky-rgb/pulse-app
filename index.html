@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ПУЛЬС">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2548/2548530.png">
+    
+    <title>ПУЛЬС - Тренировки</title>
+    
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    
+    <style>
+        :root {
+            --bg: #000000;
+            --card: #121212;
+            --border: #222222;
+            --accent: #F4D03F;
+            --text: #FFFFFF;
+            --text-dim: #888888;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: #000;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            font-family: -apple-system, system-ui, sans-serif;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 500px; /* Для ПК будет выглядеть как телефон */
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Шапка с учетом челки iPhone */
+        header {
+            padding: 50px 25px 15px; /* Отступ сверху для статус-бара */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .brand { font-weight: 900; color: var(--accent); letter-spacing: 3px; font-size: 1.2rem; }
+        .tab-indicator { color: var(--text-dim); font-size: 0.7rem; font-weight: bold; }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 20px 120px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .ex-card {
+            background: var(--card);
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .ex-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .ex-image { width: 50px; height: 50px; border-radius: 14px; background: #1a1a1a; padding: 8px; }
+        .ex-name { font-size: 1.2rem; font-weight: 700; }
+
+        .set-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #1a1a1a; padding: 12px 18px; border-radius: 16px; margin-bottom: 10px;
+        }
+
+        .set-info { font-size: 0.8rem; color: var(--text-dim); font-weight: bold; }
+        .set-input-wrap { display: flex; align-items: center; gap: 10px; }
+        .set-input-wrap input {
+            background: #252525; border: 1px solid #444; color: var(--accent);
+            width: 55px; padding: 8px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 1rem;
+        }
+
+        .btn-add {
+            width: 100%; padding: 16px; background: transparent; border: 2px dashed #333;
+            color: var(--accent); border-radius: 20px; font-weight: bold; cursor: pointer;
+        }
+
+        /* Навигация */
+        nav {
+            position: absolute; bottom: 0; width: 100%; height: 90px;
+            background: rgba(10, 10, 10, 0.95);
+            display: flex; border-top: 1px solid #222; padding-bottom: 20px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            flex: 1; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; color: var(--text-dim); text-decoration: none;
+        }
+
+        .nav-btn.active { color: var(--accent); }
+        .nav-icon { font-size: 1.4rem; }
+        .nav-label { font-size: 0.6rem; font-weight: 800; margin-top: 4px; }
+
+        /* Профиль */
+        .profile-item {
+            background: var(--card); padding: 20px; border-radius: 20px;
+            margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .profile-item input { background: #1a1a1a; border: 1px solid #333; color: var(--accent); padding: 10px; border-radius: 12px; width: 80px; text-align: center; }
+
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+    <header>
+        <div class="brand">ПУЛЬС</div>
+        <div class="tab-indicator">{{ activeTab === 0 ? 'ТРЕНИРОВКА' : 'МОЙ ПРОФИЛЬ' }}</div>
+    </header>
+
+    <main>
+        <div v-if="activeTab === 0">
+            <div v-for="(ex, exIdx) in exercises" :key="exIdx" class="ex-card">
+                <div class="ex-header">
+                    <img :src="ex.img" class="ex-image">
+                    <span class="ex-name">{{ ex.name }}</span>
+                </div>
+                <div v-for="(set, sIdx) in ex.sets" :key="sIdx" class="set-row">
+                    <span class="set-info">СЕТ {{ sIdx + 1 }}</span>
+                    <div class="set-input-wrap">
+                        <input type="number" v-model="set.reps" @focus="$event.target.select()">
+                        <button @click="ex.sets.splice(sIdx, 1)" style="background:none; border:none; color:#ff4444; font-weight:bold; font-size: 1.2rem; padding: 0 10px;">×</button>
+                    </div>
+                </div>
+                <button class="btn-add" @click="ex.sets.push({reps:0})">+ ДОБАВИТЬ ПОДХОД</button>
+            </div>
+        </div>
+
+        <div v-if="activeTab === 1">
+            <div class="profile-item"><label>Вес тела (кг)</label><input v-model="user.weight" type="number"></div>
+            <div class="profile-item"><label>Рост (см)</label><input v-model="user.height" type="number"></div>
+            <div class="profile-item"><label>Возраст</label><input v-model="user.age" type="number"></div>
+            
+            <div style="margin-top: 30px; text-align: center;">
+                <p style="color: var(--text-dim); font-size: 0.8rem;">ВРЕМЯ СНА: <b style="color:var(--accent)">{{ sleepHours }} ч</b></p>
+                <input type="range" v-model="sleepHours" min="0" max="12" step="0.5" style="width: 100%; accent-color: var(--accent);">
+            </div>
+        </div>
+    </main>
+
+    <nav>
+        <div class="nav-btn" :class="{ active: activeTab === 0 }" @click="activeTab = 0">
+            <span class="nav-icon">⚡</span>
+            <span class="nav-label">ТРЕНИНГ</span>
+        </div>
+        <div class="nav-btn" :class="{ active: activeTab === 1 }" @click="activeTab = 1">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">ПРОФИЛЬ</span>
+        </div>
+    </nav>
+</div>
+
+<script>
+    const { createApp } = Vue
+    createApp({
+        data() {
+            return {
+                activeTab: 0,
+                sleepHours: 8,
+                user: { weight: 80, height: 180, age: 25 },
+                exercises: [
+                    { name: 'Подтягивания', img: 'https://cdn-icons-png.flaticon.com/512/2548/2548530.png', sets: [{reps: 10}] },
+                    { name: 'Отжимания', img: 'https://cdn-icons-png.flaticon.com/512/2548/2548537.png', sets: [{reps: 20}] },
+                    { name: 'Приседания', img: 'https://cdn-icons-png.flaticon.com/512/2548/2548525.png', sets: [{reps: 15}] },
+                    { name: 'Пресс', img: 'https://cdn-icons-png.flaticon.com/512/2548/2548512.png', sets: [{reps: 30}] },
+                    { name: 'Бег (км)', img: 'https://cdn-icons-png.flaticon.com/512/553/553416.png', sets: [{reps: 5}] }
+                ]
+            }
+        }
+    }).mount('#app')
+</script>
+
+</body>
+</html>
