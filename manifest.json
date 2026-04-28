@@ -1,0 +1,15 @@
+{
+  "name": "ПУЛЬС — Трекер",
+  "short_name": "ПУЛЬС",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#F4D03F",
+  "icons": [
+    {
+      "src": "pulse-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
